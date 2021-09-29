@@ -1,0 +1,159 @@
+<div id="createEditServerModal" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">
+					<span data-role="mode">Create</span> Server
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label class="control-label" for="serverKey">
+						Server Key
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Unique key/name for this server instance."></i>
+					</label>
+					<input class="form-control" type="text" name="serverKey" id="serverKey">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="saveFilePath">
+						Save File Path
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Absolute file path of the .ark save file to monitor/extract data from."></i>
+					</label>
+					<input class="form-control" type="text" name="saveFilePath" id="saveFilePath">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="ip">
+						IP Address
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="The IP address used to connect to this server instance."></i>
+					</label>
+					<input class="form-control" type="text" name="ip" id="ip">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="queryPort">
+						Query Port
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="The port used to connect to this server instance."></i>
+					</label>
+					<input class="form-control" type="text" name="queryPort" id="queryPort">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="clusterKey">
+						Cluster Key
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Optional key for the cluster instance this server is part of."></i>
+					</label>
+					<!-- TODO: make select (dropdown) from clusters added earlier -->
+					<input class="form-control" type="text" name="clusterKey" id="clusterKey">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="displayAddress">
+						Display Address
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Public server address visible to players."></i>
+					</label>
+					<input class="form-control" type="text" name="displayAddress" id="displayAddress">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="rconPort">
+						RCON Port
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="The port used to connect to this server instance over rcon."></i>
+					</label>
+					<input class="form-control" type="text" name="rconPort" id="rconPort">
+				</div>
+
+				<div class="form-group">
+					<label class="control-label" for="rconPassword">
+						RCON Password
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="The password used to connect to this server instance via rcon."></i>
+					</label>
+					<input class="form-control" type="text" name="rconPassword" id="rconPassword">
+				</div>
+
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						Server Management
+					</div>
+					<div class="panel-body">
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" name="serverManagementEnabled" id="serverManagementEnabled"> Enabled
+							</label>
+						</div>
+
+						<div class="form-group">
+							<label class="control-label" for="serverExecutablePath">
+								Server Executable Path
+								<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Absolute file path of the server instance executable."></i>
+							</label>
+							<input class="form-control" type="text" name="serverExecutablePath" id="serverExecutablePath">
+						</div>
+
+						<div class="form-group">
+							<label class="control-label" for="serverExecutableArguments">
+								Server Executable Arguments
+								<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Command line arguments used when starting the server instance."></i>
+							</label>
+							<input class="form-control" type="text" name="serverExecutableArguments" id="serverExecutableArguments">
+						</div>
+
+						<div class="form-group">
+							<label class="control-label" for="steamCmdExecutablePath">
+								Steam Command Executable Path
+								<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Absolute file path of the steamcmd executable."></i>
+							</label>
+							<input class="form-control" type="text" name="steamCmdExecutablePath" id="steamCmdExecutablePath">
+						</div>
+
+						<div class="form-group">
+							<label class="control-label" for="serverInstallDirPath">
+								Server Install Dir Path
+								<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="The directory path to force steamcmd updates to."></i>
+							</label>
+							<input class="form-control" type="text" name="serverInstallDirPath" id="serverInstallDirPath">
+						</div>
+
+						<div class="form-group">
+							<label class="control-label">
+								Use Powershell Output Redirect
+								<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Use alternative powershell/file based output redirect for update progress notifications."></i>
+							</label>
+
+							<div>
+								<label class="radio-inline">
+									<input type="radio" name="usePowershellOutputRedirect" value="true"> True
+								</label>
+								<label class="radio-inline">
+									<input type="radio" name="usePowershellOutputRedirect" value="false"> False
+								</label>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="control-label">
+						Disable Chat Notifications
+						<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Disable chat notifications for this server instance when trigged by admin multiple server countdown (feature is used for compatibility with cross server chat)."></i>
+					</label>
+
+					<div>
+						<label class="radio-inline">
+							<input type="radio" name="disableChatNotifications" value="true"> True
+						</label>
+						<label class="radio-inline">
+							<input type="radio" name="disableChatNotifications" value="false"> False
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" id="createServerBtn" class="btn btn-success">Create</button>
+			</div>
+		</div>
+	</div>
+</div>

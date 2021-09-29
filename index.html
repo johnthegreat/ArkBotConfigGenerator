@@ -1,0 +1,658 @@
+<!-- Copyright (c) 2021 John Nahlen -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>ArkBot Config Generator</title>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha512-Dop/vW3iOtayerlYAqCgkVr2aTr2ErwwTYOvRFUpzl2VhCMJyjQF0Q9TjUXIo6JhuM/3i0vVEt2e/7QQmnHQqw==" crossorigin="anonymous" />
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+	<!-- TODO: use Bootstrap 4 instead of Bootstrap 3 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha512-oBTprMeNEKCnqfuqKd6sbvFzmFQtlXS3e0C/RGFV0hD6QzhHV+ODfaQbAlmY6/q0ubbwlAM/nCJjkrgA3waLzg==" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js" integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg==" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js" integrity="sha512-WFN04846sdKMIP5LKNphMaWzU7YpMyCU245etK3g/2ARYbPK9Ub18eG+ljU96qKRCWh+quCY7yefSmlkQw1ANQ==" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/EventEmitter/5.2.8/EventEmitter.min.js" integrity="sha512-AbgDRHOu/IQcXzZZ6WrOliwI8umwOgLE7sZgRAsNzmcOWlQA8RhXQzBx99Ho0jlGPWIPoT9pwk4kmeeR4qsV/g==" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js" integrity="sha512-sIqUEnRn31BgngPmHt2JenzleDDsXwYO+iyvQ46Mw6RL+udAUZj2n/u/PGY80NxRxynO7R9xIGx5LEzw4INWJQ==" crossorigin="anonymous"></script>
+
+	<script async src="js/modals/ConfirmActionModal.js"></script>
+	<script async src="js/modals/CreateEditClusterModal.js"></script>
+	<script async src="js/modals/CreateEditServerModal.js"></script>
+	<script async src="js/modals/CreateEditUserRoleModal.js"></script>
+	<script async src="js/modals/ImportConfigurationModal.js"></script>
+
+	<script src="js/UserRolesTableDataManager.js"></script>
+	<script src="js/ClustersTableDataManager.js"></script>
+	<script src="js/ServersTableDataManager.js"></script>
+
+	<script src="js/index.js"></script>
+
+	<style type="text/css">
+		html, body {
+			scroll-behavior: smooth;
+		}
+
+		i[data-role="icon"] {
+			color: white;
+		}
+	</style>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-lg-12">
+				<h1>ArkBot Config Generator</h1>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-lg-6">
+				<button class="btn btn-block btn-success" id="importConfigButton" style="margin-bottom: 1rem;">Import from Existing Config</button>
+
+				<form>
+					<!--<div class="form-group">
+						<label class="control-label" for="arkbotVersion">ArkBot Version</label>
+						<select class="form-control">
+							<option>1.9x</option>
+							<option>2.x</option>
+						</select>
+					</div>-->
+
+					<div class="panel panel-primary">
+						<div class="panel-heading" role="tab" id="headingSteam">
+							Steam
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseSteam" aria-expanded="false" aria-controls="collapseSteam">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+						<div id="collapseSteam" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingSteam">
+							<div class="panel-body">
+								<div class="form-group">
+									<label class="control-label" for="steamApiKey">
+										Steam Api Key
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Steam API key used for fetching user information. From http://steamcommunity.com/dev/."></i>
+									</label>
+									<input class="form-control" type="text" name="steamApiKey" id="steamApiKey" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="botConfigPanel">
+						<div class="panel-heading" role="tab" id="headingBotConfig">
+							Bot Config
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseBotConfig" aria-expanded="false" aria-controls="collapseSteam">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+						<div id="collapseBotConfig" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingBotConfig">
+							<div class="panel-body">
+								<div class="form-group" id="botNameFormGroup">
+									<label class="control-label" for="botName">
+										Bot Name
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Short name to identify the bot."></i>
+									</label>
+									<input class="form-control" type="text" name="botName" id="botName" placeholder="ArkBot" />
+								</div>
+								<div class="form-group" id="botUrlFormGroup">
+									<label class="control-label" for="botUrl">
+										Bot URL
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Website URL associated with the bot or ARK server."></i>
+									</label>
+									<input class="form-control" type="text" name="botUrl" id="botUrl" />
+								</div>
+								<div class="form-group" id="appUrlFormGroup">
+									<label class="control-label" for="appUrl">
+										App URL
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="External URL pointing to the Web App."></i>
+									</label>
+									<input class="form-control" type="text" name="appUrl" id="appUrl" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary">
+						<div class="panel-heading" role="tab" id="headingDiscord">
+							Discord
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseDiscord" aria-expanded="false" aria-controls="collapseDiscord">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+						<div id="collapseDiscord" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingDiscord">
+							<div class="panel-body">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="discordEnabled" id="discordEnabled"> Enabled
+									</label>
+								</div>
+
+								<div class="form-group" id="discordBotTokenFormGroup">
+									<label class="control-label" for="botToken">
+										Bot Token
+
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Discord bot authentication token from https://discordapp.com/developers."></i>
+									</label>
+									<input class="form-control" type="text" name="botToken" id="botToken" />
+								</div>
+
+								<div class="form-group" id="discordEnabledChannelsFormGroup">
+									<label class="control-label">
+										Enabled Channels
+									</label>
+
+									<button class="btn btn-sm btn-success" type="button" id="addDiscordEnabledChannelsBtn">
+										<i class="glyphicon glyphicon-plus"></i> Add
+									</button>
+
+									<div id="discordEnabledChannelContainer">
+										<input class="form-control" type="text" name="discordEnabledChannel[]" placeholder="channel-name">
+									</div>
+								</div>
+
+								<div class="form-group" id="discordInfoTopicChannelFormGroup">
+									<label class="control-label" for="discordInfoTopicChannel">
+										Info Topic Channel
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Channel where the topic is set to display information about last update, next update and how to use bot commands."></i>
+									</label>
+									<input class="form-control" type="text" name="discordInfoTopicChannel" id="discordInfoTopicChannel">
+								</div>
+
+								<div class="form-group" id="discordAnnouncementChannelFormGroup">
+									<label class="control-label" for="discordAnnouncementChannel">
+										Announcement Channel
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Channel where announcements are made (votes etc.)."></i>
+									</label>
+									<input class="form-control" type="text" name="discordAnnouncementChannel" id="discordAnnouncementChannel">
+								</div>
+
+								<div class="form-group" id="discordMemberRoleNameFormGroup">
+									<label class="control-label" for="discordMemberRoleName">
+										Member Role Name
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="This is the name (Not ID) of the role which members have on Discord"></i>
+									</label>
+									<input class="form-control" type="text" name="discordMemberRoleName" id="discordMemberRoleName">
+								</div>
+
+								<div class="form-group" id="discordDisableDeveloperFetchSaveDataFormGroup">
+									<label class="control-label">
+										Disable Developer Fetch Save Data
+
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Disable users in developer role fetching JSON or save file data."></i>
+									</label>
+
+									<div>
+										<label class="radio-inline">
+											<input type="radio" name="disableDeveloperFetchSaveData" value="true"> True
+										</label>
+
+										<label class="radio-inline">
+											<input type="radio" name="disableDeveloperFetchSaveData" value="false"> False
+										</label>
+									</div>
+								</div>
+
+								<div class="panel panel-default" id="discordAccessControlPanel">
+									<div class="panel-heading">
+										Access Control
+									</div>
+									<div class="panel-body">
+										<div class="alert alert-info">
+											<i class="glyphicon glyphicon-info"></i> Not Yet Implemented.
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group" id="steamOpenIdRelyingServiceListenPrefixFormGroup">
+									<label class="control-label" for="steamOpenIdRelyingServiceListenPrefix">
+										Steam Open Id Relying Service Listen Prefix
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Http listen prefix for Steam OpenID Relying Party web service (requires a port that is open to external connections)."></i>
+									</label>
+									<input class="form-control" type="text" name="steamOpenIdRelyingServiceListenPrefix" id="steamOpenIdRelyingServiceListenPrefix" placeholder="http://+:60002/openid/">
+								</div>
+
+								<div class="form-group" id="steamOpenIdRedirectUriFormGroup">
+									<label class="control-label" for="steamOpenIdRedirectUri">
+										Steam Open Id Redirect Uri
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Publicly accessible URL for incoming Steam OpenID Relying Party web service connections (requires a port that is open to external connections)."></i>
+									</label>
+									<input class="form-control" type="text" name="steamOpenIdRedirectUri" id="steamOpenIdRedirectUri">
+								</div>
+
+								<div class="form-group" id="discordLogLevelFormGroup">
+									<label class="control-label" for="discordLogLevel">Log Level</label>
+									<!-- TODO: determine other possible values and make a select -->
+									<input class="form-control" type="text" name="discordLogLevel" id="discordLogLevel" placeholder="Warning">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- User Roles -->
+					<div class="panel panel-primary" id="userRolesPanel">
+						<div class="panel-heading" role="tab" id="headingUserRoles">
+							User Roles
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseUserRoles" aria-expanded="false" aria-controls="collapseUserRoles">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+
+						<div id="collapseUserRoles" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingUserRoles">
+							<div class="panel-body">
+								<button class="btn btn-sm btn-success" type="button" id="addUserRoleBtn" style="margin-bottom: 1rem;">
+									<i class="glyphicon glyphicon-plus"></i> Add User Role
+								</button>
+
+								<div class="table-responsive">
+									<table class="table table-bordered table-striped" id="userRolesTable">
+										<thead>
+											<tr>
+												<th>Role</th>
+												<th>Steam Ids</th>
+												<th>Actions</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="accessControlPanel">
+						<div class="panel-heading" role="tab" id="headingAccessControl">
+							Access Control
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseAccessControl" aria-expanded="false" aria-controls="collapseAccessControl">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+
+						<div id="collapseAccessControl" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingAccessControl">
+							<div class="panel-body">
+								<div class="alert alert-info">
+									<i class="glyphicon glyphicon-info"></i> Not Yet Implemented.
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="backupsPanel">
+						<div class="panel-heading" role="tab" id="headingBackups">
+							Backups
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseBackups" aria-expanded="false" aria-controls="collapseBackups">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+
+						<div id="collapseBackups" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingBackups">
+							<div class="panel-body">
+								<div class="checkbox">
+									<label>
+										<input type="checkbox" name="backupsEnabled" id="backupsEnabled"> Enabled
+									</label>
+								</div>
+
+								<div class="form-group" id="backupsDirectoryPathFormGroup">
+									<label class="control-label" for="backupsDirectoryPath">Backups Directory Path</label>
+									<input class="form-control" type="text" name="backupsDirectoryPath" id="backupsDirectoryPath">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="webAppConfigPanel">
+						<div class="panel-heading" role="tab" id="headingWebAppConfig">
+							Web App Config
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseWebAppConfig" aria-expanded="false" aria-controls="collapseWebAppConfig">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+						<div id="collapseWebAppConfig" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingWebAppConfig">
+							<div class="panel-body">
+								<div class="form-group" id="webApiListenPrefixFormGroup">
+									<label class="control-label" for="webApiListenPrefix">
+										Web Api Listen Prefix
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Http listen prefix for WebAPI service (requires a port that is open to external connections)."></i>
+									</label>
+									<input class="form-control" type="text" name="webApiListenPrefix" id="webApiListenPrefix" placeholder="http://+:60001/">
+								</div>
+
+								<div class="form-group" id="webAppListenPrefixFormGroup">
+									<label class="control-label" for="webAppListenPrefix">
+										Web App Listen Prefix
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Http listen prefix for Web App (requires a port that is open to external connections)."></i>
+									</label>
+
+									<input class="form-control" type="text" name="webAppListenPrefix" id="webAppListenPrefix" placeholder="http://+:80/">
+								</div>
+
+								<div class="form-group" id="webAppRedirectListenPrefixFormGroup">
+									<label class="control-label">
+										Web App Redirect Listen Prefix
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Http listen prefix(es) that are redirected to BotUrl."></i>
+									</label>
+
+									<button class="btn btn-sm btn-success" type="button" id="addWebAppRedirectListenPrefixBtn">
+										<i class="glyphicon glyphicon-plus"></i> Add
+									</button>
+
+									<div id="webAppRedirectListenPrefixContainer">
+										<input class="form-control" type="text" name="webAppRedirectListenPrefix[]">
+									</div>
+								</div>
+
+								<div class="panel panel-default" id="webAppSslPanel">
+									<div class="panel-heading">
+										SSL
+									</div>
+									<div class="panel-body">
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" name="sslEnabled" id="sslEnabled"> Enabled
+											</label>
+										</div>
+
+										<div class="form-group" id="challengeListenPrefixFormGroup">
+											<label class="control-label" for="challengeListenPrefix">
+												Challenge Listen Prefix
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Http listen prefix for ssl challenge request (external port must be 80)."></i>
+											</label>
+											<input class="form-control" type="text" name="challengeListenPrefix" id="challengeListenPrefix" placeholder="http://+:80/">
+										</div>
+
+										<div class="form-group" id="sslNameFormGroup">
+											<label class="control-label" for="sslName">
+												SSL Name
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Friendly name of the certificate."></i>
+											</label>
+											<input class="form-control" type="text" name="sslName" id="sslName">
+										</div>
+
+										<div class="form-group" id="sslPasswordFormGroup">
+											<label class="control-label" for="sslPassword">
+												SSL Password
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Private password."></i>
+											</label>
+											<input class="form-control" type="text" name="sslPassword" id="sslPassword">
+										</div>
+
+										<div class="form-group" id="sslEmailFormGroup">
+											<label class="control-label" for="sslEmail">
+												SSL Email
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Registration contact email."></i>
+											</label>
+											<input class="form-control" type="text" name="sslEmail" id="sslEmail">
+										</div>
+
+										<div class="form-group" id="sslDomainsFormGroup">
+											<label class="control-label">
+												SSL Domains
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Domain name(s) to issue the certificate for."></i>
+											</label>
+
+											<button class="btn btn-sm btn-success" type="button" id="addSSLDomainsBtn">
+												<i class="glyphicon glyphicon-plus"></i> Add
+											</button>
+
+											<div id="sslDomainsContainer">
+												<input class="form-control" type="text" name="sslDomains[]">
+											</div>
+										</div>
+
+										<div class="form-group" id="sslPortsFormGroup">
+											<label class="control-label">
+												SSL Ports
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Ports to bind the ssl certificate to."></i>
+											</label>
+
+											<button class="btn btn-sm btn-success" type="button" id="addSSLPortsBtn">
+												<i class="glyphicon glyphicon-plus"></i> Add
+											</button>
+
+											<div id="sslPortsContainer">
+												<input class="form-control" type="text" name="sslPorts[]">
+											</div>
+										</div>
+
+										<div class="form-group">
+											<label class="control-label">
+												Use Compatibility Non SNI Bindings
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Use non SNI SSL bindings for previous Windows OS (before Windows 8/2012)."></i>
+											</label>
+
+											<div>
+												<label class="radio-inline">
+													<input type="radio" name="useCompatibilityNonSNIBindings" value="true"> True
+												</label>
+
+												<label class="radio-inline">
+													<input type="radio" name="useCompatibilityNonSNIBindings" value="false"> False
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="miscellaneousFormGroup">
+						<div class="panel-heading" role="tab" id="headingMiscellaneous">
+							Miscellaneous
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseMiscellaneous" aria-expanded="false" aria-controls="collapseMiscellaneous">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+						<div id="collapseMiscellaneous" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingMiscellaneous">
+							<div class="panel-body">
+								<div class="form-group" id="powershellFilePathFormGroup">
+									<label class="control-label" for="powershellFilePath">
+										Powershell File Path
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Absolute file path of the powershell executable (only used with Server.UsePowershellOutputRedirect)."></i>
+									</label>
+									<input class="form-control" type="text" name="powershellFilePath" id="powershellFilePath">
+								</div>
+
+
+								<div class="form-group">
+									<label class="control-label">
+										Use Compatability Change Watcher
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Use timer based .ark save file watcher rather than the default (based on FileSystemWatcher)."></i>
+									</label>
+
+									<div>
+										<label class="radio-inline">
+											<input type="radio" name="useCompatibilityChangeWatcher" value="true"> True
+										</label>
+
+										<label class="radio-inline">
+											<input type="radio" name="useCompatibilityChangeWatcher" value="false"> False
+										</label>
+									</div>
+								</div>
+
+								<div class="form-group" id="savegameExtractionMaxDegreeOfParallelismFormGroup">
+									<label class="control-label" for="savegameExtractionMaxDegreeOfParallelism">
+										Savegame Extraction Max Degree Of Parallelism
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Use timer based .ark save file watcher rather than the default (based on FileSystemWatcher)."></i>
+									</label>
+									<input class="form-control" type="text" name="savegameExtractionMaxDegreeOfParallelism" id="savegameExtractionMaxDegreeOfParallelism">
+								</div>
+
+
+								<div class="form-group">
+									<label class="control-label">Anonymize Web Api Data</label>
+
+									<div>
+										<label class="radio-inline">
+											<input type="radio" name="anonymizeWebApiData" value="true"> True
+										</label>
+
+										<label class="radio-inline">
+											<input type="radio" name="anonymizeWebApiData" value="false"> False
+										</label>
+									</div>
+								</div>
+
+								<div class="panel panel-default" id="arkMultipliersPanel">
+									<div class="panel-heading">
+										Ark Multipliers
+									</div>
+									<div class="panel-body">
+										<div class="form-group" id="eggHatchSpeedMultiplierFormGroup">
+											<label class="control-label" for="eggHatchSpeedMultiplier">
+												Egg Hatch Speed Multiplier
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Pregnancy/incubation time multiplier."></i>
+											</label>
+											<input class="form-control" type="text" name="eggHatchSpeedMultiplier" id="eggHatchSpeedMultiplier" placeholder="1.0">
+										</div>
+
+										<div class="form-group" id="babyMatureSpeedMultiplierFormGroup">
+											<label class="control-label" for="babyMatureSpeedMultiplier">
+												Baby Mature Speed Multiplier
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Baby mature time multiplier."></i>
+											</label>
+											<input class="form-control" type="text" name="babyMatureSpeedMultiplier" id="babyMatureSpeedMultiplier" placeholder="1.0">
+										</div>
+
+										<div class="form-group" id="cuddleIntervalMultiplierFormGroup">
+											<label class="control-label" for="cuddleIntervalMultiplier">
+												Cuddle Interval Speed Multiplier
+												<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="Multiplier for duration between cuddles."></i>
+											</label>
+											<input class="form-control" type="text" name="cuddleIntervalMultiplier" id="cuddleIntervalMultiplier" placeholder="1.0">
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group" id="tempFileOutputDirPathFormGroup">
+									<label class="control-label" for="tempFileOutputDirPath">
+										Temp File Output Dir Path
+										<i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="An existing directory path where temporary binary files can be stored (map-images etc.)"></i>
+									</label>
+									<input class="form-control" type="text" name="tempFileOutputDirPath" id="tempFileOutputDirPath">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="clustersPanel">
+						<div class="panel-heading" role="tab" id="headingClusters">
+							Clusters
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseClusters" aria-expanded="false" aria-controls="collapseClusters">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+
+						<div id="collapseClusters" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingClusters">
+							<div class="panel-body">
+								<button class="btn btn-success" type="button" id="addClusterBtn" style="margin-bottom: 1rem;">
+									<i class="glyphicon glyphicon-plus"></i> Add Cluster
+								</button>
+
+								<table id="clustersTable" class="table table-bordered table-striped">
+									<thead>
+										<tr>
+											<th>Cluster Key</th>
+											<th>Save Path</th>
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+
+					<div class="panel panel-primary" id="serversPanel">
+						<div class="panel-heading" role="tab" id="headingServers">
+							Servers
+
+							<a class="collapsed" role="button" data-toggle="collapse" href="#collapseServers" aria-expanded="false" aria-controls="collapseServers">
+								<span class="pull-right">
+									<i data-role="icon" class="glyphicon glyphicon-chevron-up"></i>
+								</span>
+							</a>
+						</div>
+
+						<div id="collapseServers" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingServers">
+							<div class="panel-body">
+								<button class="btn btn-success" type="button" id="addServerBtn" style="margin-bottom: 1rem;">
+									<i class="glyphicon glyphicon-plus"></i> Add Server
+								</button>
+
+								<div class="table-responsive">
+									<table id="serversTable" class="table table-bordered table-striped">
+										<thead>
+											<tr>
+												<th nowrap="nowrap">Key</th>
+												<th nowrap="nowrap">Save File Path</th>
+												<th nowrap="nowrap">IP</th>
+												<th nowrap="nowrap">Query Port</th>
+												<th nowrap="nowrap">Cluster Key</th>
+												<th nowrap="nowrap">Display Address</th>
+												<th nowrap="nowrap">RCON Port</th>
+												<th nowrap="nowrap">RCON Password</th>
+												<th nowrap="nowrap">Server Management Enabled</th>
+												<th nowrap="nowrap">Server Management Server Executable Path</th>
+												<th nowrap="nowrap">Server Management Server Executable Arguments</th>
+												<th nowrap="nowrap">Server Management Steam Command Executable Path</th>
+												<th nowrap="nowrap">Server Management Server Install Directory Path</th>
+												<th nowrap="nowrap">Server Management Use Powershell Output Redirect</th>
+												<th nowrap="nowrap">Disable Chat Notifications</th>
+												<th nowrap="nowrap">Actions</th>
+											</tr>
+										</thead>
+										<tbody></tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!--<button class="btn btn-block btn-success" type="button" id="generateConfigurationButton">Generate Configuration</button>-->
+				</form>
+			</div>
+			<div class="col-lg-6">
+				<button class="btn btn-block btn-success" style="margin-bottom: 1rem;" id="copyToClipboardBtn" data-clipboard-target="#generatedConfig">
+					<i class="glyphicon glyphicon-copy"></i> Copy to Clipboard
+				</button>
+
+				<p>Generated Config:</p>
+
+				<pre id="generatedConfig">
+				</pre>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
